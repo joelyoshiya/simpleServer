@@ -33,18 +33,23 @@ func userInfo(w http.ResponseWriter, r *http.Request) {
 	userId, err := strconv.Atoi(r.URL.Query().Get("userid"))
 	if err != nil {
 		fmt.Println("Error: ", err)
+		// include a status code and content type
+		w.WriteHeader(http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
 		// return error as json
 		json.NewEncoder(w).Encode(err)
+		return
 	}
 	// find the user in the database
 	for _, user := range users {
 		if user.UserID == userId {
 			// return user info as json
 			fmt.Println("Endpoint Hit: getUserInfo")
-			json.NewEncoder(w).Encode(user)
 			// include a status code and content type
 			w.WriteHeader(http.StatusOK)
 			w.Header().Set("Content-Type", "application/json")
+			// return user info as json
+			json.NewEncoder(w).Encode(user)
 		}
 	}
 }
@@ -57,10 +62,11 @@ func allUserInfo(w http.ResponseWriter, r *http.Request) {
 		User{UserID: 2, Name: "Jane", Surname: "Doe"},
 	}
 	fmt.Println("Endpoint Hit: returnAllUsers")
-	json.NewEncoder(w).Encode(users)
 	// include a status code and content type
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	// return all user info as json
+	json.NewEncoder(w).Encode(users)
 }
 
 // handler function to return server status
