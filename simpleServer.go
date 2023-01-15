@@ -42,6 +42,9 @@ func userInfo(w http.ResponseWriter, r *http.Request) {
 			// return user info as json
 			fmt.Println("Endpoint Hit: getUserInfo")
 			json.NewEncoder(w).Encode(user)
+			// include a status code and content type
+			w.WriteHeader(http.StatusOK)
+			w.Header().Set("Content-Type", "application/json")
 		}
 	}
 }
@@ -55,6 +58,9 @@ func allUserInfo(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("Endpoint Hit: returnAllUsers")
 	json.NewEncoder(w).Encode(users)
+	// include a status code and content type
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 }
 
 // handler function to return server status
