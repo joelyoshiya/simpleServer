@@ -13,7 +13,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -45,124 +44,6 @@ const endpoint = "https://jsonmock.hackerrank.com/api/article_users" // can use 
 // define a threshold for the number of submissions
 const threshold = 10
 
-// manual ummarshalling for body
-func (b *Body) UnmarshalJSON(j []byte) error {
-	var rawStrings map[string]string
-
-	err := json.Unmarshal(j, &rawStrings)
-	if err != nil {
-		return err
-	}
-
-	for k, v := range rawStrings {
-		if strings.ToLower(k) == "page" {
-			b.Page, err = strconv.Atoi(v)
-			if err != nil {
-				return err
-			}
-		}
-		if strings.ToLower(k) == "per_page" {
-			b.PerPage, err = strconv.Atoi(v)
-			if err != nil {
-				return err
-			}
-		}
-		if strings.ToLower(k) == "total" {
-			b.Total, err = strconv.Atoi(v)
-			if err != nil {
-				return err
-			}
-		}
-		if strings.ToLower(k) == "total_pages" {
-			b.TotalPages, err = strconv.Atoi(v)
-			if err != nil {
-				return err
-			}
-		}
-		if strings.ToLower(k) == "data" {
-			// define an Authors type
-			// for each data entry, unmarshal the json into an Author type
-			// append the Author to the Authors type
-
-			// first, unmarshal the json into a map of strings
-			var rawAuthors map[string]string
-			err := json.Unmarshal([]byte(v), &rawAuthors)
-			if err != nil {
-				return err
-			}
-			// now, iterate over the map and unmarshal each entry into an Author type
-			for _, v := range rawAuthors {
-				var a Author
-				var ap = &a
-				err := ap.UnmarshalJSON([]byte(v))
-				if err != nil {
-					return err
-				}
-				b.Data = append(b.Data, *ap)
-			}
-		}
-	}
-	return nil
-}
-
-// manual unmashalling of json: https://ukiahsmith.com/blog/go-marshal-and-unmarshal-json-with-time-and-url-data/
-func (a *Author) UnmarshalJSON(j []byte) error {
-	var rawStrings map[string]string
-
-	err := json.Unmarshal(j, &rawStrings)
-	if err != nil {
-		return err
-	}
-
-	for k, v := range rawStrings {
-		if strings.ToLower(k) == "id" {
-			a.ID, err = strconv.Atoi(v)
-			if err != nil {
-				return err
-			}
-		}
-		if strings.ToLower(k) == "username" {
-			a.Username = v
-		}
-		if strings.ToLower(k) == "about" {
-			a.About = v
-		}
-		if strings.ToLower(k) == "submitted" {
-			a.Submitted, err = strconv.Atoi(v)
-			if err != nil {
-				return err
-			}
-		}
-		if strings.ToLower(k) == "submission_count" {
-			a.SubmissionCount, err = strconv.Atoi(v)
-			if err != nil {
-				return err
-			}
-		}
-		if strings.ToLower(k) == "updated_at" {
-			t, err := time.Parse(time.RFC3339, v) // confirmed via this site: https://ijmacd.github.io/rfc3339-iso8601/#:~:text=RFC%203339%20is%20case%2Dinsensitive,the%20standard%20allows%20arbitrary%20precision.
-			if err != nil {
-				return err
-			}
-			a.UpdatedAt = t
-		}
-		if strings.ToLower(k) == "comment_count" {
-			a.CommentCount, err = strconv.Atoi(v)
-			if err != nil {
-				return err
-			}
-		}
-		if strings.ToLower(k) == "created_at" {
-			a.CreatedAt, err = strconv.Atoi(v)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
 // get the data from the endpoint, then print to stdout
 func getAndPrint() error {
 	currPage := 1
@@ -180,9 +61,9 @@ func getAndPrint() error {
 			return err
 		}
 		// unmarsall the data into a Body type
-		var body Body
+		body := Body{}
 		var bp = &body
-		bp.UnmarshalJSON(b) // this is a custom unmarshal function (triggers the custom unmarshal functions for the Author and Authors types)
+		json.Unmarshal(b, &bp) // this is a custom unmarshal function (triggers the custom unmarshal functions for the Author and Authors types)
 		if err != nil {
 			return err
 		}
@@ -193,7 +74,7 @@ func getAndPrint() error {
 		println("page:", body.Page)
 		println("per_page:", body.PerPage)
 		println("total:", body.Total)
-		println("total_pages:", body.TotalPages)
+
 		// set the total pages
 		totalPages = body.TotalPages
 		// iterate through the data and print the data that meets the threshold
