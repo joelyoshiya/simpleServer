@@ -8,36 +8,36 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
-	"time"
+
+	"github.com/joelyoshiya/go_rest_api_no_frameworks/dataStructs"
 )
 
 // define structures in memory on the server
 
-type Body struct {
-	Page       int     `json:"page"`
-	PerPage    int     `json:"per_page"`
-	Total      int     `json:"total"`
-	TotalPages int     `json:"total_pages"`
-	Data       Authors `json:"data"`
-}
+// type Body struct {
+// 	Page       int     `json:"page"`
+// 	PerPage    int     `json:"per_page"`
+// 	Total      int     `json:"total"`
+// 	TotalPages int     `json:"total_pages"`
+// 	Data       Authors `json:"data"`
+// }
 
-type Author struct {
-	ID              int       `json:"id"`
-	Username        string    `json:"username"`
-	About           string    `json:"about"`
-	Submitted       int       `json:"submitted"`
-	UpdatedAt       time.Time `json:"updated_at"`
-	SubmissionCount int       `json:"submission_count"`
-	CommentCount    int       `json:"comment_count"`
-	CreatedAt       int       `json:"created_at"`
-}
+// type Author struct {
+// 	ID              int       `json:"id"`
+// 	Username        string    `json:"username"`
+// 	About           string    `json:"about"`
+// 	Submitted       int       `json:"submitted"`
+// 	UpdatedAt       time.Time `json:"updated_at"`
+// 	SubmissionCount int       `json:"submission_count"`
+// 	CommentCount    int       `json:"comment_count"`
+// 	CreatedAt       int       `json:"created_at"`
+// }
 
-type Authors []Author
+// type Authors []Author
 
 // define the endpoint - note, this is a paginated endpoint
 const endpoint = "https://jsonmock.hackerrank.com/api/article_users" // can use query params to filter pages
@@ -61,29 +61,26 @@ func getAndPrint() error {
 			return err
 		}
 		// unmarsall the data into a Body type
-		body := Body{}
-		var bp = &body
-		json.Unmarshal(b, &bp) // this is a custom unmarshal function (triggers the custom unmarshal functions for the Author and Authors types)
+		body := dataStructs.Body{}
+		bp := &body
+		json.Unmarshal(b, &bp)
 		if err != nil {
 			return err
 		}
 		if bp == nil {
 			return errors.New("body is nil")
 		}
-		// print page, per_page, total, total_pages
-		println("page:", body.Page)
-		println("per_page:", body.PerPage)
-		println("total:", body.Total)
 
-		// set the total pages
-		totalPages = body.TotalPages
+		// set the total pages if this is the first page
+		if currPage == 1 {
+			totalPages = body.TotalPages
+		}
+
 		// iterate through the data and print the data that meets the threshold
 		for _, author := range body.Data {
-			// if author.SubmissionCount > threshold {
-			// 	println(author.ID, author.SubmissionCount)
-			// }
-			// print to stdout
-			fmt.Println(author.ID, author.SubmissionCount)
+			if author.SubmissionCount > threshold {
+				println(author.Username, author.SubmissionCount)
+			}
 		}
 		// increment the page
 		currPage++

@@ -11,23 +11,25 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/joelyoshiya/go_rest_api_no_frameworks/dataStructs"
 )
 
 // define structures in memory on the server
-type User struct {
-	UserID  int    `json:"userid"`
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
-}
+// type User struct {
+// 	UserID  int    `json:"userid"`
+// 	Name    string `json:"name"`
+// 	Surname string `json:"surname"`
+// }
 
-type Users []User
+// type Users []User
 
 func userInfo(w http.ResponseWriter, r *http.Request) {
 	// get user info from database
 	// return user info as json
-	users := Users{
-		User{UserID: 1, Name: "John", Surname: "Smith"},
-		User{UserID: 2, Name: "Jane", Surname: "Doe"},
+	users := dataStructs.Users{
+		dataStructs.User{UserID: 1, Name: "John", Surname: "Smith"},
+		dataStructs.User{UserID: 2, Name: "Jane", Surname: "Doe"},
 	}
 	// get user id from request
 	userId, err := strconv.Atoi(r.URL.Query().Get("userid"))
@@ -57,9 +59,9 @@ func userInfo(w http.ResponseWriter, r *http.Request) {
 func allUserInfo(w http.ResponseWriter, r *http.Request) {
 	// get all user info from database
 	// return all user info as json
-	users := Users{
-		User{UserID: 1, Name: "John", Surname: "Smith"},
-		User{UserID: 2, Name: "Jane", Surname: "Doe"},
+	users := dataStructs.Users{
+		dataStructs.User{UserID: 1, Name: "John", Surname: "Smith"},
+		dataStructs.User{UserID: 2, Name: "Jane", Surname: "Doe"},
 	}
 	fmt.Println("Endpoint Hit: returnAllUsers")
 	// include a status code and content type
